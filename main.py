@@ -57,7 +57,7 @@ async def chat(request: Request):
         
         with open(tmp_path, "rb") as f:
             try:
-                supabase.storage.from_("IRIS (Cloud)").upload(
+                supabase.storage.from_("AIN Cloud Storage").upload(
                     path=file_path_in_bucket,
                     file=f,
                     file_options={"upsert": "true"}
