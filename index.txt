@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iris (AIN Cloud)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1a1f2c;
+            color: #ffffff;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        #header {
+            background-color: #111520;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-bottom: 1px solid #2a324b;
+        }
+        #username-container {
+            padding: 10px;
+            background-color: #161b26;
+            text-align: center;
+            border-bottom: 1px solid #2a324b;
+        }
+        #username {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #2a324b;
+            background-color: #1a1f2c;
+            color: #ffffff;
+            width: 200px;
+            text-align: center;
+        }
+        #chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .message {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .ai-message {
+            background-color: #2a324b;
+            align-self: flex-start;
+        }
+        .user-message {
+            background-color: #2563eb;
+            align-self: flex-end;
+        }
+        #input-container {
+            display: flex;
+            padding: 15px;
+            background-color: #111520;
+            border-top: 1px solid #2a324b;
+        }
+        #message-input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #2a324b;
+            background-color: #1a1f2c;
+            color: #ffffff;
+            font-size: 1rem;
+        }
+        #send-btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 0 20px;
+            margin-left: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">Iris (AIN Cloud)</div>
+    
+    <div id="username-container">
+        <input type="text" id="username" placeholder="Enter your username" value="Thomas">
+    </div>
+
+    <div id="chat-box">
+        <div class="message ai-message">Hello. I'm Iris. Enter your username above and let me know how I can help you.</div>
+    </div>
+
+    <div id="input-container">
+        <input type="text" id="message-input" placeholder="Type a message..." autofocus>
+        <button id="send-btn" onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const messageInput = document.getElementById('message-input');
+        const usernameInput = document.getElementById('username');
+
+        messageInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            const username = usernameInput.value.trim() || "Anonymous";
+
+            if (!text) return;
+
+            const userMsgDiv = document.createElement('div');
+            userMsgDiv.className = 'message user-message';
+            userMsgDiv.textContent = text;
+            chatBox.appendChild(userMsgDiv);
+
+            messageInput.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, message: text })
+                });
+
+                if (!response.ok) throw new Error('Backend error');
+
+                const data = await response.json();
+
+                const aiMsgDiv = document.createElement('div');
+                aiMsgDiv.className = 'message ai-message';
+                aiMsgDiv.textContent = data.reply;
+                chatBox.appendChild(aiMsgDiv);
+
+            } catch (error) {
+                const errDiv = document.createElement('div');
+                errDiv.className = 'message ai-message';
+                errDiv.style.backgroundColor = '#7f1d1d';
+                errDiv.textContent = 'Error connecting to Iris backend.';
+                chatBox.appendChild(errDiv);
+            }
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+</body>
+</html>
